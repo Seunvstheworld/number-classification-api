@@ -48,8 +48,9 @@ def classify_number():
     number = request.args.get('number')
 
     if number is None:
-        return jsonify({"error": "No number provided"}), 400
+        return jsonify({"error": "No number provided"}), 400  # Handle missing number
 
+    # ✅ Handle invalid numbers (non-numeric values)
     try:
         number = float(number) if '.' in number else int(number)
     except ValueError:
@@ -61,18 +62,19 @@ def classify_number():
             properties.append("armstrong")
         if is_perfect(number):
             properties.append("perfect")
+
     properties.append("odd" if number % 2 != 0 else "even")
 
     response = {
         "number": number,
-        "is_prime": bool(is_prime(number)),
-        "is_perfect": bool(is_perfect(number)),
-        "properties": properties,
-        "digit_sum": int(sum(int(digit) for digit in str(abs(number)) if digit.isdigit())),
-        "fun_fact": str(get_fun_fact(number))
+        "is_prime": bool(is_prime(number)),  # ✅ Ensure boolean type
+        "is_perfect": bool(is_perfect(number)),  # ✅ Ensure boolean type
+        "properties": properties,  # ✅ Ensure it's a list
+        "digit_sum": sum(int(digit) for digit in str(abs(number)) if digit.isdigit()),  # ✅ Ensure it's numeric
+        "fun_fact": str(get_fun_fact(number))  # ✅ Ensure it's a string
     }
 
-    return jsonify(response), 200
+    return jsonify(response), 200  # ✅ Return 200 for valid numbers
 
 if __name__ == '__main__':
     app.run(debug=True)
