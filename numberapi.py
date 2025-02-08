@@ -2,12 +2,12 @@ from flask import Flask, request, jsonify
 import requests
 import math
 
-app = Flask(__name__)  # Ensure Flask app is instantiated correctly and globally
+app = Flask(__name__)
 
 # Helper functions
 def is_prime(n):
     """Check if a number is prime."""
-    if not isinstance(n, int) or n < 2:  # Prime numbers must be integers ≥ 2
+    if not isinstance(n, int) or n < 2:
         return False
     for i in range(2, int(math.sqrt(n)) + 1):
         if n % i == 0:
@@ -16,13 +16,13 @@ def is_prime(n):
 
 def is_perfect(n):
     """Check if a number is a perfect number."""
-    if not isinstance(n, int) or n <= 0:  # No perfect numbers for negatives or non-integers
+    if not isinstance(n, int) or n <= 0:
         return False
     return sum(i for i in range(1, n) if n % i == 0) == n
 
 def is_armstrong(n):
     """Check if a number is an Armstrong number."""
-    if not isinstance(n, int):  # Armstrong numbers apply to integers only
+    if not isinstance(n, int):
         return False
     num_str = str(abs(n))
     power = len(num_str)
@@ -33,9 +33,7 @@ def get_fun_fact(n):
     try:
         url = f"http://numbersapi.com/{n}/math"
         response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            return response.text
-        return "No fact available."
+        return response.text if response.status_code == 200 else "No fact available."
     except requests.exceptions.RequestException:
         return "Fact API unavailable."
 
@@ -49,10 +47,9 @@ def classify_number():
     """Classify the given number and return properties."""
     number = request.args.get('number')
 
-    if not number:
-        return jsonify({"error": "No number provided"}), 400  # Handle missing number
+    if number is None:
+        return jsonify({"error": "No number provided"}), 400
 
-    # Handle invalid numbers (non-numeric values)
     try:
         number = float(number) if '.' in number else int(number)
     except ValueError:
@@ -64,19 +61,18 @@ def classify_number():
             properties.append("armstrong")
         if is_perfect(number):
             properties.append("perfect")
-
     properties.append("odd" if number % 2 != 0 else "even")
 
     response = {
         "number": number,
-        "is_prime": is_prime(number),
-        "is_perfect": is_perfect(number),
+        "is_prime": bool(is_prime(number)),
+        "is_perfect": bool(is_perfect(number)),
         "properties": properties,
-        "digit_sum": sum(int(digit) for digit in str(abs(number)) if digit.isdigit()),
-        "fun_fact": get_fun_fact(number)
+        "digit_sum": int(sum(int(digit) for digit in str(abs(number)) if digit.isdigit())),
+        "fun_fact": str(get_fun_fact(number))
     }
 
-    return jsonify(response), 200  # Return 200 for valid numbers
+    return jsonify(response), 200
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
